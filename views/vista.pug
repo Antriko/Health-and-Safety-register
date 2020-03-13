@@ -1,0 +1,51 @@
+extends layout
+
+block content
+  div.container-fluid
+    div.row
+      div.col-3.left
+        img.logo(src="images/logo.png")
+        h3 Vista
+        h3= date
+
+      div.col-9.right
+        -for (i=0;i<db.length;i++) {
+          -if (db[i].Arrival == "00:00")
+            form(method='post' action='/vistaLogin')
+              div.row.right-row
+                div.col-2= db[i].FirstName
+                input(type='hidden' value=db[i].FirstName name='user')
+                div.col-4
+                  div.row
+                    div.col-6
+                      input.form-control.time(type="time", name="time" value="10:00" requried)
+                    div.col-6
+                      button.btn.btn-block.btn-dark(value="2" name="type") Arrived late
+                div.col-2.offspan-1
+                  button.btn.btn-block.btn-dark(value="1" name="type") Arrived on time
+                div.col-2
+                  button.btn.btn-block.btn-dark(value="0" name="type") Absent
+          -else
+            div.row.right-row
+              div.col-2= db[i].FirstName
+              div.col-2
+                p= db[i].Arrival
+              div.col-2
+                p= db[i].Departure
+              div.col-2
+                p= db[i].TimeWorked / 60 + " hours"
+
+        -}
+  -if (debug == true)
+    br
+    br
+    br
+    br
+    div.dev
+      h1 raw JSON
+      br
+      h3 db
+      div.db= JSON.stringify(db)
+      br
+      h3 date
+      div.date= JSON.stringify(date)

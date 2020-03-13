@@ -1,0 +1,220 @@
+extends layout
+
+block content
+  div.container-fluid
+    div.row
+      div.col-3.left
+        img.logo(src="images/logo.png")
+        h3 Admin panel    
+        div.row.left-item
+          div.col-12
+            a.btn.btn-dark.btn-block(href="/attendance") Attendance
+        div.row.left-item
+          div.col-12
+            a.btn.btn-dark.btn-block(href="/adminLogout") Logout
+        div.row.left-item
+          div.col-12
+            input#data-search.form-control(placeholder="Search for")
+      div.col-9.right
+
+        form.set-custom(method='POST' action='/customSet')
+          div.form-group
+            div.row
+              div.col-3
+                select.form-control(name="name")
+                  -for (i=0; i<people.length;i++) {
+                    option(value=people[i].FirstName)= people[i].FirstName
+                  -}
+              div.col-2
+                input.form-control.time(type="time", name="time" requried)
+              div.col-2.offset-2
+                button.btn.btn-dark.btn-block(name="Arrival" value=1) Set arrival
+              div.col-2
+                button.btn.btn-dark.btn-block(name="Departure" value=1) Set departure
+
+
+        form.display-from(method='POST' action='/displayFromDate')
+          div.form-group
+            div.row
+              div.col-3
+                h6 From
+                  input.form-control(type="date", name="date1" required)
+              div.col-3
+                h6 To
+                  input.form-control(type="date" name="date2" required)
+              div.col-2.offset-3
+                p
+                button#betweenDate.btn.btn-dark.btn-block Submit query
+
+        form.end-day(method='POST' action='/endDay')
+          div.form-group
+            div.row
+              div.col-2
+                h6 Time
+                  input.form-control(type="time" name="time" required)
+              div.col-2.offset-7
+                p
+                button.btn.btn-dark.btn-block(href="/endDay") End of the day
+        
+        form(method='POST' action='/newUser') 
+          div.form-group
+            div.row
+              div.col-2
+                h6 Name
+                  input#name.form-control(type='text' placeholder='full name' name='name')
+              div.col-7
+                div.row
+                  div.col
+                    h6 Monday
+                      select.form-control(name='monday')
+                        option(value="0") 0
+                        option(value="1" selected) 1
+                        option(value="2") 2
+                  div.col
+                    h6 Tuesday
+                      select.form-control(name='tuesday')
+                        option(value="0") 0
+                        option(value="1" selected) 1
+                        option(value="2") 2
+                  div.col
+                    h6 Wednesday
+                      select.form-control(name='wednesday')
+                        option(value="0") 0
+                        option(value="1" selected) 1
+                        option(value="2") 2
+                  div.col
+                    h6 Thursday
+                      select.form-control(name='thursday')
+                        option(value="0") 0
+                        option(value="1" selected) 1
+                        option(value="2") 2
+                  div.col
+                    h6 Friday
+                      select.form-control(name='friday')
+                        option(value="0") 0
+                        option(value="1" selected) 1
+                        option(value="2") 2
+              div.col-2
+                p
+                button.btn.btn-dark.btn-block(type='submit') Register
+        form(method='POST' action='/setHoliday')
+          div.form-group
+            div.row
+              div.col-3
+                select.form-control(name="name")
+                  -for (i=0; i<people.length;i++) {
+                    option#nameSelected(value=people[i].FirstName)= people[i].FirstName
+                  -}
+              div.col-3
+                input.form-control(type="date", name="date" required)
+              div.col-2.offset-3
+                button.btn.btn-dark.btn-block Set holiday
+        form(method='POST' action='/setAbsent')
+          div.form-group
+            div.row
+              div.col-3
+                select.form-control(name="name")
+                  -for (i=0; i<people.length;i++) {
+                    option#nameSelected(value=people[i].FirstName)= people[i].FirstName
+                  -}
+              div.col-4
+                input.form-control(type="text", name="reason" placeholder="Reason for absent" required)
+              div.col-2.offset-2
+                button.btn.btn-dark.btn-block Set absent
+        form(method='POST' action='/setVista')
+          div.form-group
+            div.row
+              div.col-3
+                select.form-control(name="date")
+                  -for (x=0; x<dates.length; x++) {
+                    -d = dates[x].slice(0, (dates[x].length-5))
+                    option(value=dates[x])= d
+                  -}
+              div.col-2.offset-6
+                button.btn.btn-dark.btn-block(type="submit") Vista
+
+  div.container-fluid.no-overflow
+    div.table-responsive
+      table.table.table-hover
+        thead.thead-dark
+          tr
+            th Name
+            -for (x=0; x<dates.length; x++) {
+              -d = dates[x].slice(0, (dates[x].length-5))
+              th= d
+            -}
+            th
+            th Hours
+            th Absent
+            -if (dates.length > 16) 
+              th Name
+        tbody.data
+          -for (x=0; x<people.length; x++) {
+            -total = 0;
+            -absent = 0;
+            tr(class=people[x].FirstName)
+              th= people[x].FirstName
+              -for (i=0; i<dates.length; i++) {
+                -nothing = true
+                -for (k=0; k<data.length; k++) {
+                  -for (j=0; j<data[k].length; j++) {
+                    if data[k][j].FirstName == people[x].FirstName && data[k][j].Date == dates[i]
+                      if Number.isInteger(parseInt(data[k][j].TimeWorked))
+                        -total += parseInt(data[k][j].TimeWorked)
+                      -if (data[k][j].TimeWorked == "/")
+                        th= data[k][j].TimeWorked
+                      -else
+                        th= Math.round((JSON.stringify(data[k][j].TimeWorked/60)) * 100) / 100
+                      -nothing = false
+                      if data[k][j].Absent == "1" || data[k][j].Absent == "2"
+                        -absent++
+                  -}
+                -}
+                if nothing == true
+                  th -
+              -}
+              th
+              th= Math.round((JSON.stringify(total/60)) * 100) / 100
+              th= absent
+              -if (dates.length > 16) 
+                th= people[x].FirstName
+          -}
+
+  div.container-fluid.workingDays.table-responsive
+    table.table.table-hover
+      thead.thead-dark
+        tr
+          th Name
+          th Monday
+          th Tuesday
+          th Wednesday
+          th Thursday
+          th Friday
+      tbody.dates
+        -for (x=0; x<people.length;x++) {
+          tr(class=people[x].FirstName)
+            th= people[x].FirstName
+            td(class="date-"+people[x].monday)= people[x].monday
+            td(class="date-"+people[x].tuesday)= people[x].tuesday
+            td(class="date-"+people[x].wednesday)= people[x].wednesday
+            td(class="date-"+people[x].thursday)= people[x].thursday
+            td(class="date-"+people[x].friday)= people[x].friday
+        -}
+
+  -if (debug == true)
+    br
+    br
+    br
+    br
+    div.dev
+      h1 raw JSON
+      br
+      h3 data
+      div.data= JSON.stringify(data)
+      br
+      h3 people
+      div.people= JSON.stringify(people)
+      br
+      h3 dates
+      div.people= JSON.stringify(dates)
+  script(src='/javascripts/admin.js')

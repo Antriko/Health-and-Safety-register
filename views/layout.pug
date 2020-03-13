@@ -1,0 +1,15 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap.css')
+    script(src='/javascripts/jquery.js')
+  body
+    nav.navbar.navbar-expand-lg.navbar-light.bg-light.fixed-top
+      a.btn(href="/") Home
+      a.btn(href="/displayInformation") Admin
+    br
+    -debug = false
+    block content
+    script(src='/javascripts/bootstrap.js')

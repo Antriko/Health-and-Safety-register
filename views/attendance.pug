@@ -1,0 +1,121 @@
+extends layout
+
+block content
+  div.container-fluid
+    div.row
+      div.col-3.left
+        img.logo(src="images/logo.png")
+        h3 Health and Safety Register
+        div.row.left-current-date
+          div.col-6.left-date
+            p.day
+            p.date
+          div.col-6.left-time
+            div.time
+        form.admin-login(method='POST' action='/adminLogin')
+          div.row
+            -if (ses.session != "true")
+              div.col-8
+                input.form-control(type="password" name="password")
+              div.col-4
+                button.btn.btn-dark.btn-block(type="submit") Admin
+            -else
+              div.col-8
+                a.btn.btn-dark.btn-block(href="displayInformation") Admin
+              div.col-4
+                a.btn.btn-dark.btn-block(href="/adminLogout") Logout
+        -if (debug == true)
+          div.row#lockdown
+            div.col-12
+              a.btn.btn-dark.btn-block(href="/artificialData") Create artificial data
+          button.btn.btn-dark#lockdown LOCKDOWN 
+      div.col-9.right
+        div.row.search-row
+          div.col-4
+            input#search-name.form-control(type="text" placeholder="Search for")
+        if (attendance.length == 0)
+          div.col-3 Refresh
+        -for (i=0;i<attendance.length;i++) {
+          div.row.right-row(class=attendance[i].FirstName + " " + (attendance[i].Absent)[0])
+            div.col-2.right-name= attendance[i].FirstName
+            div.col-4
+              -if (attendance[i].Absent == "_")
+                -n=attendance[i].FirstName
+                -n=n.replace(/\ /g, "")
+                button.btn.btn-dark.btn-block.btn-arrive(type="button" data-toggle="modal" data-target="#"+n) Arrive
+                //form.right-info(method='POST' action='/userLogin')
+                  input(type='hidden' value=attendance[i].FirstName name='userLogging')
+                  div.col-6
+                    button.btn.btn-dark.btn-block.btn-arrive(type='submit') Arrive
+              -else if (attendance[i].Absent == "3")
+                div.right-info
+                  div.col-6
+                    button.btn.btn-success.btn-block(type='submit' disabled) Vista
+              -else if (attendance[i].Absent == "2")
+                div.right-info
+                  div.col-6
+                    button.btn.btn-info.btn-block(type='submit' disabled) Vacation
+              -else if (attendance[i].Absent == "1")
+                div.right-info
+                  div.col-6
+                    button.btn.btn-info.btn-block(type='submit' disabled) Absent
+              -else
+                div.right-info
+                  div.arrive= attendance[i].Arrival
+                  div.late=attendance[i].MinutesLate + " mintues late"
+            div.col-4
+              -if (attendance[i].Arrival != "-" && attendance[i].Absent != "3" && attendance[i].Absent != "2" && attendance[i].Absent != "1")
+                -if (attendance[i].Departure == ":")
+                  form.right-info(method='POST' action='/userLogout')
+                    input(type='hidden' value=attendance[i].FirstName name='userLogging')
+                    div.col-6
+                      button.btn.btn-dark.btn-block(type='submit') Logout
+                -else
+                  div.right-info
+                    div.arrive= attendance[i].Departure
+                    div.late=attendance[i].TimeWorked + " mintues worked"
+                    div.late=Math.round((attendance[i].TimeWorked/60) * 100) / 100 + " hours worked"
+        -}
+        div.vista-list
+        div.vac-list
+  -if (debug == true)
+    br
+    br
+    div.rawData raw JSON file
+      div= JSON.stringify(attendance)
+    br
+    br
+    br
+    a.btn.btn-primary(href='/resetDatabase') Reset the database [for testing]
+    br
+    br
+    br
+    input#hour.col-1(type="number")
+    input#minute.col-1(type="number")
+    br
+    br
+    button.btn.btn-primary#setTime Set the time
+    br
+    br
+    button.btn.btn-primary(href='/') Go back
+
+  -for (i=0; i<attendance.length; i++) {
+    -n=attendance[i].FirstName
+    -n=n.replace(/\ /g, "")  
+    div.modal.fade(id=n tabindex="-1" role="dialog")
+      div.modal-dialog(role="document")
+        div.modal-content
+          div.modal-header
+            h2= attendance[i].FirstName
+          div.modal-body
+            form.right-info(method='POST' action='/userLogin')
+              input(type='hidden' value=attendance[i].FirstName name='userLogging')
+              button.btn.btn-dark.btn-block.btn-arrive(type='submit') Arrive
+          div.modal-footer
+            button.btn.btn-dark(data-dismiss="modal") Close
+  -}
+    
+    
+
+
+  script(src='/javascripts/attendance.js')
